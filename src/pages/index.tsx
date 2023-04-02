@@ -29,7 +29,7 @@ const Home: NextPage = () => {
         <div>
           {posts.data &&
             posts.data.map((post) => {
-              return <div>{post.content}</div>;
+              return <div key={post.id}>{post.content}</div>;
             })}
         </div>
       </main>
