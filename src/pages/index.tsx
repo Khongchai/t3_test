@@ -1,8 +1,65 @@
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 
 import { api } from "~/utils/api";
+import type { RouterOutputs } from "~/utils/api";
+import "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+import Image from "next/image";
+dayjs.extend(relativeTime);
+
+const CreatePostWizard = () => {
+  const { user } = useUser();
+
+  if (!user) return null;
+
+  return (
+    <div className="flex w-full gap-3">
+      <Image
+        src={user.profileImageUrl}
+        alt="Profile image"
+        className="h-14 w-14 rounded-full"
+        width={56}
+        height={56}
+      />
+      <input
+        placeholder="Type some emojis!"
+        className="grow bg-transparent outline-none"
+      />
+    </div>
+  );
+};
+
+type PostWithUser = RouterOutputs["posts"]["getAll"][number];
+
+const PostView = (props: PostWithUser) => {
+  const { post, author } = props;
+  return (
+    <div
+      className="flex items-center gap-2 border-b border-slate-400 p-8"
+      key={post.id}
+    >
+      <Image
+        src={author.profileImageUrl}
+        alt="Profile image"
+        className="h-8 w-8 rounded-full"
+        width={32}
+        height={32}
+      />
+      <div className="flex flex-col items-start font-bold text-slate-400">
+        <span>
+          @{author.username}
+          <span className="font-thin">{` · ${dayjs(
+            post.createdAt
+          ).fromNow()}`}</span>
+        </span>
+        <p>{post.content}</p>
+      </div>
+    </div>
+  );
+};
 
 const Home: NextPage = () => {
   const { isLoading, data: posts } = api.posts.getAll.useQuery();
@@ -26,16 +83,12 @@ const Home: NextPage = () => {
             {!user.isSignedIn ? (
               <SignInButton mode="modal" />
             ) : (
-              <SignOutButton />
+              <CreatePostWizard />
             )}
           </div>
           <div className="flex flex-col">
             {posts &&
-              posts.map((post) => (
-                <div className="border-b border-slate-400 p-8" key={post.id}>
-                  {post.content}
-                </div>
-              ))}
+              posts.map((props) => <PostView {...props} key={props.post.id} />)}
           </div>
         </div>
       </main>
