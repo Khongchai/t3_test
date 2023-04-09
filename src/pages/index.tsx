@@ -8,6 +8,7 @@ import "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import Image from "next/image";
+import LoadingIndicator from "~/components/loading";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -61,14 +62,27 @@ const PostView = (props: PostWithUser) => {
   );
 };
 
+const Feed = () => {
+  const { data: posts, isLoading: isPostLoading } = api.posts.getAll.useQuery();
+
+  if (isPostLoading && !posts) return <LoadingIndicator full />;
+  if (!posts) return <div>Something went wrong</div>;
+
+  return (
+    <div className="flex flex-col">
+      {posts &&
+        posts.map((props) => <PostView {...props} key={props.post.id} />)}
+    </div>
+  );
+};
+
 const Home: NextPage = () => {
-  const { isLoading, data: posts } = api.posts.getAll.useQuery();
+  // Prefetch
+  api.posts.getAll.useQuery();
 
   const user = useUser();
 
-  if (isLoading) return <div>...is loading</div>;
-
-  if (!posts) return <div>Something went wrong</div>;
+  if (!user.isLoaded) return <div />;
 
   return (
     <>
@@ -86,10 +100,7 @@ const Home: NextPage = () => {
               <CreatePostWizard />
             )}
           </div>
-          <div className="flex flex-col">
-            {posts &&
-              posts.map((props) => <PostView {...props} key={props.post.id} />)}
-          </div>
+          <Feed />
         </div>
       </main>
     </>
