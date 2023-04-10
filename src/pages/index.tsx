@@ -9,7 +9,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import Image from "next/image";
 import LoadingIndicator from "~/components/loading";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -17,7 +17,24 @@ const CreatePostWizard = () => {
 
   const { user } = useUser();
 
-  const { mutate } = api.posts.create.useMutation();
+  const ctx = api.useContext();
+
+  const {
+    mutate,
+    isLoading: isPosting,
+    error,
+  } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      ctx.posts.getAll.invalidate();
+    },
+  });
+
+  useEffect(() => {
+    if (error?.message) {
+      alert(error.message);
+    }
+  }, [error]);
 
   if (!user) return null;
 
@@ -36,6 +53,7 @@ const CreatePostWizard = () => {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        disabled={isPosting}
       />
       <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
