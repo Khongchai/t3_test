@@ -19,27 +19,19 @@ const CreatePostWizard = () => {
 
   const ctx = api.useContext();
 
-  const {
-    mutate,
-    isLoading: isPosting,
-    error,
-  } = api.posts.create.useMutation({
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
       ctx.posts.getAll.invalidate();
     },
+    onError: (error) => {
+      alert(error.data?.httpStatus);
+    },
   });
-
-  useEffect(() => {
-    if (error?.message) {
-      alert(error.message);
-    }
-  }, [error]);
-
   if (!user) return null;
 
   return (
-    <div className="flex w-full gap-3">
+    <div className="flex w-full items-center gap-3">
       <Image
         src={user.profileImageUrl}
         alt="Profile image"
@@ -55,7 +47,17 @@ const CreatePostWizard = () => {
         onChange={(e) => setInput(e.target.value)}
         disabled={isPosting}
       />
-      <button onClick={() => mutate({ content: input })}>Post</button>
+      <button
+        className="relative h-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+        onClick={() => mutate({ content: input })}
+        disabled={isPosting}
+      >
+        {isPosting ? (
+          <LoadingIndicator variant="s" full={false} />
+        ) : (
+          <span>Post</span>
+        )}
+      </button>
     </div>
   );
 };
@@ -92,7 +94,7 @@ const PostView = (props: PostWithUser) => {
 const Feed = () => {
   const { data: posts, isLoading: isPostLoading } = api.posts.getAll.useQuery();
 
-  if (isPostLoading && !posts) return <LoadingIndicator full />;
+  if (isPostLoading && !posts) return <LoadingIndicator variant="m" full />;
   if (!posts) return <div>Something went wrong</div>;
 
   return (
