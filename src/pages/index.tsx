@@ -9,7 +9,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import Image from "next/image";
 import LoadingIndicator from "~/components/loading";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -30,6 +30,22 @@ const CreatePostWizard = () => {
   });
   if (!user) return null;
 
+  function onMutate() {
+    mutate({ content: input });
+  }
+
+  function onInputChange(e: ChangeEvent<HTMLInputElement>) {
+    setInput(e.target.value);
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      if (input) {
+        mutate({ content: input });
+      }
+    }
+  }
+
   return (
     <div className="flex w-full items-center gap-3">
       <Image
@@ -44,12 +60,13 @@ const CreatePostWizard = () => {
         className="grow bg-transparent outline-none"
         type="text"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={onInputChange}
         disabled={isPosting}
+        onKeyDown={onKeyDown}
       />
       <button
         className="relative h-fit rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-        onClick={() => mutate({ content: input })}
+        onClick={onMutate}
         disabled={isPosting}
       >
         {isPosting ? (
