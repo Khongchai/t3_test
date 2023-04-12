@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import Image from "next/image";
 import LoadingIndicator from "~/components/loading";
 import { ChangeEvent, useEffect, useState } from "react";
+import Link from "next/link";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -97,10 +98,13 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col items-start font-bold text-slate-400">
         <span>
-          @{author.username}
-          <span className="font-thin">{` · ${dayjs(
-            post.createdAt
-          ).fromNow()}`}</span>
+          <Link href={`/@${author.username}`}>@{author.username}</Link>
+          <span className="font-thin">
+            {" · "}
+            <Link href={`/post/${post.id}`}>
+              {dayjs(post.createdAt).fromNow()}
+            </Link>
+          </span>
         </span>
         <p>{post.content}</p>
       </div>
