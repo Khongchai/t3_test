@@ -8,7 +8,6 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { prisma } from "~/server/db";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -28,7 +27,7 @@ export const postsRouter = createTRPCRouter({
         userId: posts.map((post) => post.authorId),
         limit: 100,
       })
-    ).map((user) => user.filterUserForClient());
+    ).map((user) => user.mapToClientUserType());
 
     return posts.map((post) => ({
       post,
@@ -38,11 +37,21 @@ export const postsRouter = createTRPCRouter({
 
   getPostsByUserId: publicProcedure
     .input(z.object({ userId: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.prisma.post.findMany({
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.prisma.post.findMany({
         where: { authorId: input.userId },
         take: 100,
         orderBy: [{ createdAt: "desc" }],
+      });
+      const author = (
+        await clerkClient.users.getUser(input.userId)
+      ).mapToClientUserType();
+
+      return posts.map((post) => {
+        return {
+          ...post,
+          author,
+        };
       });
     }),
 

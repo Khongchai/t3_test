@@ -2,7 +2,7 @@ import { User } from "@clerk/nextjs/dist/api";
 
 declare module "@clerk/nextjs/dist/api" {
   interface User {
-    filterUserForClient(): {
+    mapToClientUserType(): {
       id: string;
       username: string;
       profileImageUrl: string;
@@ -10,7 +10,7 @@ declare module "@clerk/nextjs/dist/api" {
   }
 }
 
-User.prototype.filterUserForClient = function () {
+User.prototype.mapToClientUserType = function () {
   return {
     id: this.id,
     username: this.username!,

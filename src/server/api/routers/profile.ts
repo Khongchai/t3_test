@@ -22,6 +22,6 @@ export const profileRouter = createTRPCRouter({
         });
       }
 
-      return user.filterUserForClient();
+      return user.mapToClientUserType();
     }),
 });

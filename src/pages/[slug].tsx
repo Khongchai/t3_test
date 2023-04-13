@@ -13,19 +13,26 @@ import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import { api } from "~/utils/api";
 import Image from "next/image";
+import PostView from "~/components/postView";
 
 type PageProps = InferGetStaticPropsType<typeof getStaticProps>;
 
-const ProfileFeed = (props: { userId: string }) => {
+const ProfileFeed = ({ userId }: { userId: string }) => {
   const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
-    userId: props.userId,
+    userId,
   });
 
   if (isLoading) return <LoadingIndicator full={false} variant={"m"} />;
 
   if (!data) return <div>No data for this user</div>;
 
-  return <div>posts</div>;
+  return (
+    <>
+      {data.map((post) => (
+        <PostView author={post.author} post={post} />
+      ))}
+    </>
+  );
 };
 
 const ProfilePage: NextPage<PageProps> = ({ username }) => {
