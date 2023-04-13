@@ -11,6 +11,7 @@ import Image from "next/image";
 import LoadingIndicator from "~/components/loading";
 import { ChangeEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { PageLayout } from "~/components/pageLayout";
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
@@ -136,18 +137,16 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <main className="flex h-screen justify-center">
-        <div className="w-full border-x border-slate-400 border-x-white md:max-w-2xl ">
-          <div className="border-b border-slate-400 p-4">
-            {!user.isSignedIn ? (
-              <SignInButton mode="modal" />
-            ) : (
-              <CreatePostWizard />
-            )}
-          </div>
-          <Feed />
+      <PageLayout>
+        <div className="border-b border-slate-400 p-4">
+          {!user.isSignedIn ? (
+            <SignInButton mode="modal" />
+          ) : (
+            <CreatePostWizard />
+          )}
         </div>
-      </main>
+        <Feed />
+      </PageLayout>
     </>
   );
 };
